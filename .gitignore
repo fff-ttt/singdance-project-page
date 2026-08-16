@@ -1,0 +1,15 @@
+# Local authoring masters. The optimized public site lives in /site.
+/index.html
+/assets/
+
+# Local release artifacts.
+*.zip
+*.tar
+*.tar.gz
+
+# OS and editor noise.
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+*~

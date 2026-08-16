@@ -1,0 +1,1701 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SingDance: Compositional Zero-Shot Singing-and-Dancing Video Generation with Role-Aware Audio Conditioning.">
+  <meta name="theme-color" content="#0c0912">
+  <title>SingDance: Compositional Zero-Shot Singing-and-Dancing Video Generation with Role-Aware Audio Conditioning</title>
+  <style>
+    :root {
+      --bg: #0c0912;
+      --bg-soft: #14101d;
+      --panel: rgba(29, 23, 40, 0.82);
+      --panel-solid: #1b1625;
+      --text: #f7f1ff;
+      --muted: #b9aec7;
+      --faint: #756b83;
+      --line: rgba(255, 255, 255, 0.11);
+      --accent: #ff7a9e;
+      --accent-2: #b47cff;
+      --accent-3: #65e5c1;
+      --max-width: 1180px;
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 5%, rgba(180, 124, 255, 0.18), transparent 30rem),
+        radial-gradient(circle at 90% 26%, rgba(255, 122, 158, 0.14), transparent 28rem),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img,
+    video {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 100;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #120d1a;
+      background: var(--text);
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      border-bottom: 1px solid var(--line);
+      background: rgba(12, 9, 18, 0.78);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      width: min(calc(100% - 36px), var(--max-width));
+      min-height: 66px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      font-weight: 760;
+      letter-spacing: -0.03em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus-visible {
+      color: var(--text);
+    }
+
+    main,
+    footer {
+      overflow: clip;
+    }
+
+    .container {
+      width: min(calc(100% - 36px), var(--max-width));
+      margin: 0 auto;
+    }
+
+    .hero {
+      min-height: calc(100svh - 66px);
+      padding: 72px 0 76px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(390px, 0.72fr);
+      align-items: center;
+      gap: clamp(34px, 5vw, 70px);
+    }
+
+    .eyebrow {
+      margin: 0 0 16px;
+      color: var(--accent-3);
+      font-size: 12px;
+      font-weight: 760;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(48px, 7.2vw, 88px);
+      line-height: 0.9;
+      letter-spacing: -0.06em;
+    }
+
+    .gradient-text {
+      display: block;
+      padding: 0 0.08em 0.08em 0;
+      color: transparent;
+      background: linear-gradient(110deg, #fff 5%, #ffb2c7 44%, #c9a6ff 78%, #70e8c8);
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .paper-title {
+      display: block;
+      max-width: 700px;
+      margin-top: 20px;
+      color: #e2dce6;
+      font-size: clamp(20px, 2.3vw, 31px);
+      font-weight: 520;
+      line-height: 1.22;
+      letter-spacing: -0.025em;
+    }
+
+    .hero-deck {
+      max-width: 590px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: clamp(16px, 1.5vw, 19px);
+      line-height: 1.55;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-deck strong {
+      color: var(--text);
+      font-weight: 650;
+    }
+
+    .hero-actions {
+      margin-top: 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .button {
+      min-height: 44px;
+      padding: 0 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 14px;
+      font-weight: 700;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .button.primary {
+      border-color: transparent;
+      color: #170d1c;
+      background: linear-gradient(110deg, #ff8cab, #c19aff);
+    }
+
+    .hero-notes {
+      margin: 29px 0 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      list-style: none;
+    }
+
+    .hero-notes li,
+    .pill {
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.035);
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .hero-task-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-task-copy {
+      padding: 25px 27px 24px;
+    }
+
+    .hero-task-copy .eyebrow {
+      margin-bottom: 11px;
+    }
+
+    .hero-task-copy h2 {
+      margin: 0;
+      font-size: clamp(25px, 2.7vw, 36px);
+      line-height: 1.06;
+      letter-spacing: -0.045em;
+    }
+
+    .hero-task-copy p:not(.eyebrow) {
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .hero-task-figure {
+      position: relative;
+      display: block;
+      padding: 14px;
+      border-top: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .hero-task-figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .hero-task-card .figure-open {
+      right: 12px;
+      bottom: 12px;
+      padding: 5px 8px;
+    }
+
+    .abstract-grid {
+      display: grid;
+      grid-template-columns: minmax(180px, 0.32fr) minmax(0, 1fr);
+      gap: clamp(30px, 7vw, 92px);
+      align-items: start;
+    }
+
+    .abstract-grid h2 {
+      position: sticky;
+      top: 102px;
+      margin: 0;
+      font-size: clamp(38px, 5vw, 58px);
+      line-height: 1;
+      letter-spacing: -0.055em;
+    }
+
+    .abstract-copy {
+      margin: 0;
+      color: #d4cada;
+      font-size: clamp(17px, 1.65vw, 20px);
+      line-height: 1.82;
+      letter-spacing: -0.012em;
+    }
+
+    .abstract-copy p {
+      margin: 0;
+    }
+
+    .abstract-copy p + p {
+      margin-top: 18px;
+    }
+
+    .abstract-copy em {
+      color: var(--text);
+      font-style: italic;
+    }
+
+    .abstract-key {
+      padding: 0 0.04em;
+      color: #f4eef5;
+      background: linear-gradient(
+        180deg,
+        transparent 66%,
+        rgba(255, 140, 171, 0.2) 66%,
+        rgba(193, 154, 255, 0.14) 100%
+      );
+      font-weight: 610;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+
+    .section {
+      padding: 108px 0;
+    }
+
+    .section.compact {
+      padding-top: 74px;
+      padding-bottom: 74px;
+    }
+
+    .section-head {
+      max-width: 810px;
+      margin-bottom: 45px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(36px, 6vw, 66px);
+      line-height: 1;
+      letter-spacing: -0.055em;
+    }
+
+    .section-head.single-line {
+      max-width: none;
+    }
+
+    .section-head.single-line h2 {
+      font-size: clamp(34px, 4.3vw, 52px);
+      white-space: nowrap;
+    }
+
+    .section-head p:not(.eyebrow) {
+      margin: 21px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    .section-head p.key-statement {
+      display: grid;
+      gap: 5px;
+      line-height: 1.4;
+    }
+
+    .key-statement span {
+      color: var(--faint);
+      font-size: 14px;
+      font-weight: 620;
+      letter-spacing: 0.025em;
+    }
+
+    .key-statement strong {
+      color: var(--text);
+      font-size: clamp(19px, 2vw, 23px);
+      font-weight: 680;
+      letter-spacing: -0.025em;
+    }
+
+    .case-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      align-items: start;
+    }
+
+    .case-grid.single {
+      grid-template-columns: minmax(0, 800px);
+      justify-content: center;
+    }
+
+    .case-grid.single.wide {
+      grid-template-columns: minmax(0, 980px);
+    }
+
+    .carousel-shell {
+      position: relative;
+    }
+
+    .carousel-toolbar {
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .carousel-hint,
+    .carousel-total {
+      color: var(--faint);
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .carousel-controls {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .carousel-total {
+      margin-right: 4px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .carousel-button {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.055);
+      font: inherit;
+      font-size: 18px;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, opacity 160ms ease;
+    }
+
+    .carousel-button:hover,
+    .carousel-button:focus-visible {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .carousel-button:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .scroll-carousel {
+      display: grid;
+      grid-auto-flow: column;
+      gap: 24px;
+      overflow-x: auto;
+      padding: 4px 2px 22px;
+      scroll-padding-inline: 2px;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-inline: contain;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.24) rgba(255, 255, 255, 0.04);
+      cursor: grab;
+    }
+
+    .role-carousel {
+      grid-auto-columns: clamp(300px, 32vw, 390px);
+    }
+
+    .lip-carousel {
+      grid-auto-columns: clamp(320px, 41vw, 520px);
+    }
+
+    .music-carousel {
+      grid-auto-columns: 100%;
+    }
+
+    .scroll-carousel::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .scroll-carousel::-webkit-scrollbar-track {
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .scroll-carousel::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.24);
+    }
+
+    .scroll-carousel > .media-card,
+    .scroll-carousel > .music-case {
+      min-width: 0;
+      scroll-snap-align: start;
+    }
+
+    .scroll-carousel.is-dragging {
+      scroll-snap-type: none;
+      cursor: grabbing;
+      user-select: none;
+    }
+
+    .media-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .media-card.featured {
+      border-color: rgba(255, 122, 158, 0.22);
+    }
+
+    .media-frame {
+      --ratio: 9 / 16;
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: var(--ratio);
+      background:
+        linear-gradient(145deg, rgba(255, 122, 158, 0.09), rgba(180, 124, 255, 0.08)),
+        #100c17;
+    }
+
+    .media-frame.landscape {
+      --ratio: 16 / 9;
+    }
+
+    .media-frame.two-up {
+      --ratio: 6 / 5;
+    }
+
+    .media-frame.role-stack {
+      --ratio: 832 / 1064;
+    }
+
+    .media-frame.music-quad {
+      --ratio: 44 / 21;
+    }
+
+    .media-frame.lip-grid {
+      --ratio: 88 / 169;
+    }
+
+    .media-frame.dance-sequence {
+      --ratio: 44 / 20;
+    }
+
+    .media-frame.showcase-grid {
+      --ratio: 11 / 8;
+    }
+
+    .music-case {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .musicinfuser-block {
+      width: min(100%, 848px);
+      margin: 0 auto;
+    }
+
+    .baseline-label {
+      margin: 0 0 10px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 18px;
+      color: var(--faint);
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .baseline-label strong {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .musicinfuser-block .media-card {
+      border-color: rgba(255, 255, 255, 0.16);
+      box-shadow: none;
+    }
+
+    .media-frame video {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      background: #050407;
+      object-fit: contain;
+      opacity: 0;
+      transition: opacity 240ms ease;
+    }
+
+    .media-frame.is-ready video {
+      opacity: 1;
+    }
+
+    .missing-state {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      padding: 28px;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      text-align: center;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: var(--faint);
+      transition: opacity 220ms ease;
+    }
+
+    .media-frame.is-ready .missing-state {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .missing-icon {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 18px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.035);
+      color: var(--muted);
+      font-size: 20px;
+    }
+
+    .missing-state strong {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .missing-state code {
+      max-width: 100%;
+      margin-top: 8px;
+      overflow-wrap: anywhere;
+      color: var(--faint);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+    }
+
+    .media-copy {
+      padding: 22px 23px 25px;
+    }
+
+    .media-kicker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--faint);
+      font-size: 11px;
+      font-weight: 720;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--accent-3);
+      box-shadow: 0 0 18px rgba(101, 229, 193, 0.66);
+    }
+
+    .media-copy h3 {
+      margin: 9px 0 0;
+      font-size: 21px;
+      line-height: 1.3;
+      letter-spacing: -0.025em;
+    }
+
+    .media-copy p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .media-meta {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .protocol-note {
+      margin: 24px auto 0;
+      max-width: 800px;
+      padding: 17px 19px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.025);
+      font-size: 13px;
+    }
+
+    .protocol-note strong {
+      color: var(--text);
+    }
+
+    .paper-figure {
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .figure-surface {
+      position: relative;
+      display: block;
+      padding: clamp(12px, 2.5vw, 28px);
+      background: #fff;
+    }
+
+    .figure-surface img {
+      width: 100%;
+      height: auto;
+    }
+
+    .figure-open {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      padding: 7px 10px;
+      border: 1px solid rgba(10, 8, 15, 0.15);
+      border-radius: 999px;
+      color: #302a38;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.12);
+      font-size: 11px;
+      font-weight: 760;
+      backdrop-filter: blur(8px);
+    }
+
+    .figure-caption {
+      padding: 22px 24px 25px;
+      border-top: 1px solid var(--line);
+    }
+
+    .figure-caption h3 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.025em;
+    }
+
+    .figure-caption p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .mechanism-grid {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .method-flow {
+      display: grid;
+      grid-template-columns: 0.9fr 56px 1.18fr 56px 0.9fr;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .condition-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .node {
+      min-height: 74px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .node strong {
+      font-size: 14px;
+    }
+
+    .node span {
+      margin-top: 3px;
+      color: var(--faint);
+      font-size: 11px;
+    }
+
+    .node.speech {
+      border-color: rgba(255, 122, 158, 0.28);
+    }
+
+    .node.music {
+      border-color: rgba(180, 124, 255, 0.31);
+    }
+
+    .node.role {
+      border-color: rgba(101, 229, 193, 0.3);
+    }
+
+    .node.core {
+      min-height: 172px;
+      text-align: center;
+      align-items: center;
+      background: linear-gradient(145deg, rgba(255, 122, 158, 0.1), rgba(180, 124, 255, 0.11));
+    }
+
+    .node.core strong {
+      font-size: 19px;
+    }
+
+    .flow-arrow {
+      position: relative;
+      height: 1px;
+      background: linear-gradient(90deg, var(--faint), var(--accent-2));
+    }
+
+    .flow-arrow::after {
+      content: "";
+      position: absolute;
+      top: -4px;
+      right: 0;
+      width: 8px;
+      height: 8px;
+      border-top: 1px solid var(--accent-2);
+      border-right: 1px solid var(--accent-2);
+      transform: rotate(45deg);
+    }
+
+    footer {
+      padding: 28px 0;
+      border-top: 1px solid var(--line);
+      color: var(--faint);
+      font-size: 12px;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        min-height: auto;
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy {
+        max-width: 740px;
+      }
+
+      .hero-task-card {
+        width: min(100%, 520px);
+        margin: 0 auto;
+      }
+
+      .section-head.single-line h2 {
+        white-space: normal;
+      }
+
+      .abstract-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .abstract-grid h2 {
+        position: static;
+      }
+
+      .method-flow {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .flow-arrow {
+        width: 1px;
+        height: 34px;
+        margin: 0 auto;
+        background: linear-gradient(var(--faint), var(--accent-2));
+      }
+
+      .flow-arrow::after {
+        top: auto;
+        right: -4px;
+        bottom: 0;
+        transform: rotate(135deg);
+      }
+
+      .node.core {
+        min-height: 130px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .nav-inner {
+        min-height: 60px;
+      }
+
+      .nav-links a {
+        display: none;
+      }
+
+      .nav-links a[href="#results"] {
+        display: block;
+      }
+
+      .hero {
+        padding-top: 56px;
+      }
+
+      .section {
+        padding: 82px 0;
+      }
+
+      .case-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .role-carousel {
+        grid-auto-columns: min(82vw, 390px);
+        gap: 16px;
+      }
+
+      .lip-carousel {
+        grid-auto-columns: min(84vw, 460px);
+        gap: 16px;
+      }
+
+      .carousel-toolbar {
+        align-items: flex-end;
+      }
+
+      .carousel-hint {
+        max-width: 170px;
+        line-height: 1.45;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container,
+      .nav-inner {
+        width: min(calc(100% - 24px), var(--max-width));
+      }
+
+      .hero h1 {
+        font-size: clamp(46px, 17vw, 68px);
+      }
+
+      .hero-actions .button {
+        flex: 1 1 auto;
+      }
+
+      .baseline-label {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Primary navigation">
+    <div class="nav-inner">
+      <a class="brand" href="#top" aria-label="SingDance home">
+        <span>SingDance</span>
+      </a>
+      <div class="nav-links">
+        <a href="#abstract">Abstract</a>
+        <a href="#tasks">Tasks</a>
+        <a href="#results">Results</a>
+        <a href="#method">Method</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <header class="container hero" id="top">
+      <div class="hero-copy">
+        <h1>
+          <span class="gradient-text">SingDance</span>
+          <span class="paper-title">Compositional Zero-Shot Singing-and-Dancing Video Generation with Role-Aware Audio Conditioning</span>
+        </h1>
+        <p class="hero-deck">
+          Explicit vocal roles compose <strong>articulation</strong> with
+          <strong>music-aligned dance</strong>.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#results">Explore demos <span aria-hidden="true">↓</span></a>
+          <a class="button" href="#method">View method</a>
+        </div>
+      </div>
+
+      <div class="hero-task-card" id="tasks">
+        <div class="hero-task-copy">
+          <p class="eyebrow">01 · Task Formulation</p>
+          <h2>The voice has a role.</h2>
+          <p>SingDance combines explicit vocal-role control with separate speech and music features extracted from audio, supporting four tasks in one model.</p>
+        </div>
+        <a class="hero-task-figure" href="assets/figures/task_overview.pdf" target="_blank" rel="noopener" aria-label="Open the four-task overview as a vector PDF">
+          <img src="assets/figures/task_overview.webp" alt="Four SingDance tasks: listening or reacting, speaking, dancing only, and zero-shot singing and dancing" decoding="async">
+          <span class="figure-open">PDF ↗</span>
+        </a>
+      </div>
+    </header>
+
+    <section class="section compact" id="abstract">
+      <div class="container abstract-grid">
+        <h2>Abstract</h2>
+        <div class="abstract-copy">
+          <p>
+            Existing systems typically model either music-conditioned choreography or
+            speech-driven articulation. SingDance brings both together for personalized video
+            generation from a reference image, text prompt, and audio. A
+            <span class="abstract-key">semantic vocal role</span> controls whether the subject
+            articulates the vocal as the <em>Source</em> or listens and reacts as the
+            <em>Listener</em>, while task-defined routing composes speech, music, and role
+            conditions.
+          </p>
+          <p>
+            Training learns vocal articulation and music-conditioned dance from separate
+            supervision; <span class="abstract-key">their joint behavior is never used as a
+            training target</span>. Composing these capabilities at inference enables
+            <span class="abstract-key">zero-shot singing-and-dancing</span> with strong beat
+            alignment, reliable role switching, visual fidelity, and competitive lip
+            synchronization.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="results">
+      <div class="container">
+        <div class="section-head single-line">
+          <p class="eyebrow">02 · Singing-and-Dancing</p>
+          <h2>Same song. Different vocal role.</h2>
+          <p class="key-statement">
+            <span>SingDance × S2V · Same image · Same song</span>
+            <strong>Vocal articulation ON / OFF</strong>
+          </p>
+        </div>
+
+        <div class="carousel-shell" data-carousel-shell>
+          <div class="carousel-toolbar">
+            <span class="carousel-hint">Drag, swipe, or use the arrows</span>
+            <div class="carousel-controls">
+              <span class="carousel-total" data-carousel-status>4 demos</span>
+              <button class="carousel-button" type="button" data-carousel-prev aria-controls="lip-carousel" aria-label="Previous lip-control comparison">&#8592;</button>
+              <button class="carousel-button" type="button" data-carousel-next aria-controls="lip-carousel" aria-label="Next lip-control comparison">&#8594;</button>
+            </div>
+          </div>
+
+          <div class="scroll-carousel lip-carousel" id="lip-carousel" data-carousel tabindex="0" aria-label="SingDance and S2V lip on and lip off comparison carousel">
+            <article class="media-card featured">
+              <div class="media-frame lip-grid" data-media>
+                <video controls playsinline preload="metadata" poster="assets/lip_control/lip_comparison_01_poster.webp" aria-label="SingDance and S2V lip on and lip off comparison one">
+                  <source src="assets/lip_control/lip_comparison_01.mp4" type="video/mp4">
+                </video>
+                <div class="missing-state" aria-hidden="true">
+                  <span class="missing-icon">2×2</span>
+                  <strong>Lip-control comparison 01</strong>
+                  <code>assets/lip_control/lip_comparison_01.mp4</code>
+                </div>
+              </div>
+            </article>
+
+            <article class="media-card">
+              <div class="media-frame lip-grid" data-media>
+                <video controls playsinline preload="metadata" poster="assets/lip_control/lip_comparison_02_poster.webp" aria-label="SingDance and S2V lip on and lip off comparison two">
+                  <source src="assets/lip_control/lip_comparison_02.mp4" type="video/mp4">
+                </video>
+                <div class="missing-state" aria-hidden="true">
+                  <span class="missing-icon">2×2</span>
+                  <strong>Lip-control comparison 02</strong>
+                  <code>assets/lip_control/lip_comparison_02.mp4</code>
+                </div>
+              </div>
+            </article>
+
+            <article class="media-card">
+              <div class="media-frame lip-grid" data-media>
+                <video controls playsinline preload="metadata" poster="assets/lip_control/lip_comparison_03_poster.webp" aria-label="SingDance and S2V lip on and lip off comparison three">
+                  <source src="assets/lip_control/lip_comparison_03.mp4" type="video/mp4">
+                </video>
+                <div class="missing-state" aria-hidden="true">
+                  <span class="missing-icon">2×2</span>
+                  <strong>Lip-control comparison 03</strong>
+                  <code>assets/lip_control/lip_comparison_03.mp4</code>
+                </div>
+              </div>
+            </article>
+
+            <article class="media-card">
+              <div class="media-frame lip-grid" data-media>
+                <video controls playsinline preload="metadata" poster="assets/lip_control/lip_comparison_04_poster.webp" aria-label="SingDance and S2V lip on and lip off comparison four">
+                  <source src="assets/lip_control/lip_comparison_04.mp4" type="video/mp4">
+                </video>
+                <div class="missing-state" aria-hidden="true">
+                  <span class="missing-icon">2×2</span>
+                  <strong>Lip-control comparison 04</strong>
+                  <code>assets/lip_control/lip_comparison_04.mp4</code>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <p class="protocol-note"><strong>Note:</strong> Wan-S2V is native 16 fps and shown at 24 fps by frame repetition for side-by-side comparison.</p>
+      </div>
+    </section>
+
+    <section class="section compact" id="control">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">03 · Vocal-Source Attribution</p>
+          <h2>Role determines who speaks.</h2>
+          <p class="key-statement">
+            <span>Same image · Same speech · Same action prompt</span>
+            <strong>Switch only the vocal role.</strong>
+          </p>
+        </div>
+
+        <div class="carousel-shell" data-carousel-shell>
+          <div class="carousel-toolbar">
+            <span class="carousel-hint">Drag, swipe, or use the arrows</span>
+            <div class="carousel-controls">
+              <span class="carousel-total" data-carousel-status>6 demos</span>
+              <button class="carousel-button" type="button" data-carousel-prev aria-controls="role-carousel" aria-label="Previous role comparison">&#8592;</button>
+              <button class="carousel-button" type="button" data-carousel-next aria-controls="role-carousel" aria-label="Next role comparison">&#8594;</button>
+            </div>
+          </div>
+
+          <div class="scroll-carousel role-carousel" id="role-carousel" data-carousel tabindex="0" aria-label="Role-only speech comparison carousel">
+          <article class="media-card">
+            <div class="media-frame role-stack" data-media>
+              <video controls playsinline preload="metadata" poster="assets/role_control/role_case_01_poster.webp" aria-label="Role-only speech comparison case one">
+                <source src="assets/role_control/role_case_01_comparison.mp4" type="video/mp4">
+              </video>
+              <div class="missing-state" aria-hidden="true">
+                <span class="missing-icon">1↕2</span>
+                <strong>Speech role pair 01</strong>
+                <code>assets/role_control/role_case_01_comparison.mp4</code>
+              </div>
+            </div>
+          </article>
+
+          <article class="media-card">
+            <div class="media-frame role-stack" data-media>
+              <video controls playsinline preload="metadata" poster="assets/role_control/role_case_02_poster.webp" aria-label="Role-only speech comparison case two">
+                <source src="assets/role_control/role_case_02_comparison.mp4" type="video/mp4">
+              </video>
+              <div class="missing-state" aria-hidden="true">
+                <span class="missing-icon">1↕2</span>
+                <strong>Speech role pair 02</strong>
+                <code>assets/role_control/role_case_02_comparison.mp4</code>
+              </div>
+            </div>
+          </article>
+
+          <article class="media-card">
+            <div class="media-frame role-stack" data-media>
+              <video controls playsinline preload="metadata" poster="assets/role_control/role_case_04_poster.webp" aria-label="Role-only speech comparison case three">
+                <source src="assets/role_control/role_case_04_comparison.mp4" type="video/mp4">
+              </video>
+              <div class="missing-state" aria-hidden="true">
+                <span class="missing-icon">1↕2</span>
+                <strong>Speech role pair 03</strong>
+                <code>assets/role_control/role_case_04_comparison.mp4</code>
+              </div>
+            </div>
+          </article>
+
+          <article class="media-card">
+            <div class="media-frame role-stack" data-media>
+              <video controls playsinline preload="metadata" poster="assets/role_control/role_case_05_poster.webp" aria-label="Role-only speech comparison case four">
+                <source src="assets/role_control/role_case_05_comparison.mp4" type="video/mp4">
+              </video>
+              <div class="missing-state" aria-hidden="true">
+                <span class="missing-icon">1↕2</span>
+                <strong>Speech role pair 04</strong>
+                <code>assets/role_control/role_case_05_comparison.mp4</code>
+              </div>
+            </div>
+          </article>
+
+          <article class="media-card">
+            <div class="media-frame role-stack" data-media>
+              <video controls playsinline preload="metadata" poster="assets/role_control/role_case_06_poster.webp" aria-label="Role-only speech comparison case five">
+                <source src="assets/role_control/role_case_06_comparison.mp4" type="video/mp4">
+              </video>
+              <div class="missing-state" aria-hidden="true">
+                <span class="missing-icon">1↕2</span>
+                <strong>Speech role pair 05</strong>
+                <code>assets/role_control/role_case_06_comparison.mp4</code>
+              </div>
+            </div>
+          </article>
+
+          <article class="media-card">
+            <div class="media-frame role-stack" data-media>
+              <video controls playsinline preload="metadata" poster="assets/role_control/role_case_07_poster.webp" aria-label="Role-only speech comparison case six">
+                <source src="assets/role_control/role_case_07_comparison.mp4" type="video/mp4">
+              </video>
+              <div class="missing-state" aria-hidden="true">
+                <span class="missing-icon">1↕2</span>
+                <strong>Speech role pair 06</strong>
+                <code>assets/role_control/role_case_07_comparison.mp4</code>
+              </div>
+            </div>
+          </article>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section" id="ablation">
+      <div class="container">
+        <div class="section-head single-line">
+          <p class="eyebrow">04 · Music Conditioning</p>
+          <h2>Music token drives the beat.</h2>
+          <p class="key-statement">
+            <span>GT · S2V · SingDance · SingDance w/o music token</span>
+            <strong>Remove the music token. Beat alignment weakens.</strong>
+          </p>
+        </div>
+
+        <div class="carousel-shell" data-carousel-shell>
+          <div class="carousel-toolbar">
+            <span class="carousel-hint">Drag, swipe, or use the arrows</span>
+            <div class="carousel-controls">
+              <span class="carousel-total" data-carousel-status>Song-based · 1 / 6</span>
+              <button class="carousel-button" type="button" data-carousel-prev aria-controls="music-carousel" aria-label="Previous music-conditioning comparison">&#8592;</button>
+              <button class="carousel-button" type="button" data-carousel-next aria-controls="music-carousel" aria-label="Next music-conditioning comparison">&#8594;</button>
+            </div>
+          </div>
+
+          <div class="scroll-carousel music-carousel" id="music-carousel" data-carousel data-carousel-status-mode="dynamic" tabindex="0" aria-label="Music-conditioning comparison carousel">
+            <article class="music-case" data-carousel-label="Song-based">
+              <div class="media-card">
+                <div class="media-frame music-quad" data-media>
+                  <video controls playsinline preload="metadata" poster="assets/music_conditioning/song_comparison_01_poster.webp" aria-label="Song-based music-conditioning comparison one">
+                    <source src="assets/music_conditioning/song_comparison_01.mp4" type="video/mp4">
+                  </video>
+                  <div class="missing-state" aria-hidden="true">
+                    <span class="missing-icon">1×4</span>
+                    <strong>Song-based comparison 01</strong>
+                    <code>assets/music_conditioning/song_comparison_01.mp4</code>
+                  </div>
+                </div>
+              </div>
+              <div class="musicinfuser-block">
+                <div class="baseline-label"><strong>MusicInfuser</strong><span>Text + Audio · No reference image</span></div>
+                <div class="media-card">
+                  <div class="media-frame landscape" data-media>
+                    <video controls playsinline preload="metadata" poster="assets/music_conditioning/musicinfuser_01_poster.webp" aria-label="MusicInfuser result for song-based comparison one">
+                      <source src="assets/music_conditioning/musicinfuser_01.mp4" type="video/mp4">
+                    </video>
+                    <div class="missing-state" aria-hidden="true">
+                      <span class="missing-icon">▶</span>
+                      <strong>MusicInfuser result 01</strong>
+                      <code>assets/music_conditioning/musicinfuser_01.mp4</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="music-case" data-carousel-label="Song-based">
+              <div class="media-card">
+                <div class="media-frame music-quad" data-media>
+                  <video controls playsinline preload="metadata" poster="assets/music_conditioning/song_comparison_02_poster.webp" aria-label="Song-based music-conditioning comparison two">
+                    <source src="assets/music_conditioning/song_comparison_02.mp4" type="video/mp4">
+                  </video>
+                  <div class="missing-state" aria-hidden="true">
+                    <span class="missing-icon">1×4</span>
+                    <strong>Song-based comparison 02</strong>
+                    <code>assets/music_conditioning/song_comparison_02.mp4</code>
+                  </div>
+                </div>
+              </div>
+              <div class="musicinfuser-block">
+                <div class="baseline-label"><strong>MusicInfuser</strong><span>Text + Audio · No reference image</span></div>
+                <div class="media-card">
+                  <div class="media-frame landscape" data-media>
+                    <video controls playsinline preload="metadata" poster="assets/music_conditioning/musicinfuser_02_poster.webp" aria-label="MusicInfuser result for song-based comparison two">
+                      <source src="assets/music_conditioning/musicinfuser_02.mp4" type="video/mp4">
+                    </video>
+                    <div class="missing-state" aria-hidden="true">
+                      <span class="missing-icon">▶</span>
+                      <strong>MusicInfuser result 02</strong>
+                      <code>assets/music_conditioning/musicinfuser_02.mp4</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="music-case" data-carousel-label="Song-based">
+              <div class="media-card">
+                <div class="media-frame music-quad" data-media>
+                  <video controls playsinline preload="metadata" poster="assets/music_conditioning/song_comparison_03_poster.webp" aria-label="Song-based music-conditioning comparison three">
+                    <source src="assets/music_conditioning/song_comparison_03.mp4" type="video/mp4">
+                  </video>
+                  <div class="missing-state" aria-hidden="true">
+                    <span class="missing-icon">1×4</span>
+                    <strong>Song-based comparison 03</strong>
+                    <code>assets/music_conditioning/song_comparison_03.mp4</code>
+                  </div>
+                </div>
+              </div>
+              <div class="musicinfuser-block">
+                <div class="baseline-label"><strong>MusicInfuser</strong><span>Text + Audio · No reference image</span></div>
+                <div class="media-card">
+                  <div class="media-frame landscape" data-media>
+                    <video controls playsinline preload="metadata" poster="assets/music_conditioning/musicinfuser_03_poster.webp" aria-label="MusicInfuser result for song-based comparison three">
+                      <source src="assets/music_conditioning/musicinfuser_03.mp4" type="video/mp4">
+                    </video>
+                    <div class="missing-state" aria-hidden="true">
+                      <span class="missing-icon">▶</span>
+                      <strong>MusicInfuser result 03</strong>
+                      <code>assets/music_conditioning/musicinfuser_03.mp4</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="music-case" data-carousel-label="Instrumental">
+              <div class="media-card">
+                <div class="media-frame music-quad" data-media>
+                  <video controls playsinline preload="metadata" poster="assets/music_conditioning/instrumental_comparison_01_poster.webp" aria-label="Instrumental music-conditioning comparison one">
+                    <source src="assets/music_conditioning/instrumental_comparison_01.mp4" type="video/mp4">
+                  </video>
+                  <div class="missing-state" aria-hidden="true">
+                    <span class="missing-icon">1×4</span>
+                    <strong>Instrumental comparison 01</strong>
+                    <code>assets/music_conditioning/instrumental_comparison_01.mp4</code>
+                  </div>
+                </div>
+              </div>
+              <div class="musicinfuser-block">
+                <div class="baseline-label"><strong>MusicInfuser</strong><span>Text + Audio · No reference image</span></div>
+                <div class="media-card">
+                  <div class="media-frame landscape" data-media>
+                    <video controls playsinline preload="metadata" poster="assets/music_conditioning/musicinfuser_04_poster.webp" aria-label="MusicInfuser result for instrumental comparison one">
+                      <source src="assets/music_conditioning/musicinfuser_04.mp4" type="video/mp4">
+                    </video>
+                    <div class="missing-state" aria-hidden="true">
+                      <span class="missing-icon">▶</span>
+                      <strong>MusicInfuser result 04</strong>
+                      <code>assets/music_conditioning/musicinfuser_04.mp4</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="music-case" data-carousel-label="Instrumental">
+              <div class="media-card">
+                <div class="media-frame music-quad" data-media>
+                  <video controls playsinline preload="metadata" poster="assets/music_conditioning/instrumental_comparison_02_poster.webp" aria-label="Instrumental music-conditioning comparison two">
+                    <source src="assets/music_conditioning/instrumental_comparison_02.mp4" type="video/mp4">
+                  </video>
+                  <div class="missing-state" aria-hidden="true">
+                    <span class="missing-icon">1×4</span>
+                    <strong>Instrumental comparison 02</strong>
+                    <code>assets/music_conditioning/instrumental_comparison_02.mp4</code>
+                  </div>
+                </div>
+              </div>
+              <div class="musicinfuser-block">
+                <div class="baseline-label"><strong>MusicInfuser</strong><span>Text + Audio · No reference image</span></div>
+                <div class="media-card">
+                  <div class="media-frame landscape" data-media>
+                    <video controls playsinline preload="metadata" poster="assets/music_conditioning/musicinfuser_05_poster.webp" aria-label="MusicInfuser result for instrumental comparison two">
+                      <source src="assets/music_conditioning/musicinfuser_05.mp4" type="video/mp4">
+                    </video>
+                    <div class="missing-state" aria-hidden="true">
+                      <span class="missing-icon">▶</span>
+                      <strong>MusicInfuser result 05</strong>
+                      <code>assets/music_conditioning/musicinfuser_05.mp4</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="music-case" data-carousel-label="Instrumental">
+              <div class="media-card">
+                <div class="media-frame music-quad" data-media>
+                  <video controls playsinline preload="metadata" poster="assets/music_conditioning/instrumental_comparison_03_poster.webp" aria-label="Instrumental music-conditioning comparison three">
+                    <source src="assets/music_conditioning/instrumental_comparison_03.mp4" type="video/mp4">
+                  </video>
+                  <div class="missing-state" aria-hidden="true">
+                    <span class="missing-icon">1×4</span>
+                    <strong>Instrumental comparison 03</strong>
+                    <code>assets/music_conditioning/instrumental_comparison_03.mp4</code>
+                  </div>
+                </div>
+              </div>
+              <div class="musicinfuser-block">
+                <div class="baseline-label"><strong>MusicInfuser</strong><span>Text + Audio · No reference image</span></div>
+                <div class="media-card">
+                  <div class="media-frame landscape" data-media>
+                    <video controls playsinline preload="metadata" poster="assets/music_conditioning/musicinfuser_06_poster.webp" aria-label="MusicInfuser result for instrumental comparison three">
+                      <source src="assets/music_conditioning/musicinfuser_06.mp4" type="video/mp4">
+                    </video>
+                    <div class="missing-state" aria-hidden="true">
+                      <span class="missing-icon">▶</span>
+                      <strong>MusicInfuser result 06</strong>
+                      <code>assets/music_conditioning/musicinfuser_06.mp4</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <p class="protocol-note"><strong>Note:</strong> Wan-S2V is native 16 fps and shown at 24 fps by frame repetition. MusicInfuser retains its native 30 fps and framing.</p>
+      </div>
+    </section>
+
+    <section class="section compact" id="dance-variation">
+      <div class="container">
+        <div class="section-head single-line">
+          <p class="eyebrow">05 · Dance Variation</p>
+          <h2>Same image. Different dance.</h2>
+        </div>
+
+        <div class="case-grid single wide">
+          <article class="media-card featured">
+            <div class="media-frame dance-sequence" data-media>
+              <video controls playsinline preload="metadata" poster="assets/dance_variation/dance_variation_01_poster.webp" aria-label="Four dance variations from the same image, activated sequentially, example one">
+                <source src="assets/dance_variation/dance_variation_01.mp4" type="video/mp4">
+              </video>
+              <div class="missing-state" aria-hidden="true">
+                <span class="missing-icon">4×1</span>
+                <strong>Dance variation 01</strong>
+                <code>assets/dance_variation/dance_variation_01.mp4</code>
+              </div>
+            </div>
+          </article>
+
+          <article class="media-card featured">
+            <div class="media-frame dance-sequence" data-media>
+              <video controls playsinline preload="metadata" poster="assets/dance_variation/dance_variation_02_poster.webp" aria-label="Four dance variations from the same image, activated sequentially, example two">
+                <source src="assets/dance_variation/dance_variation_02.mp4" type="video/mp4">
+              </video>
+              <div class="missing-state" aria-hidden="true">
+                <span class="missing-icon">4×1</span>
+                <strong>Dance variation 02</strong>
+                <code>assets/dance_variation/dance_variation_02.mp4</code>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="container">
+        <div class="section-head single-line">
+          <p class="eyebrow">06 · Framework</p>
+          <h2>SingDance Framework</h2>
+        </div>
+
+        <figure class="paper-figure">
+          <a class="figure-surface" href="assets/figures/model_overview.pdf" target="_blank" rel="noopener" aria-label="Open the SingDance model overview as a vector PDF">
+            <img src="assets/figures/model_overview.webp" alt="SingDance model architecture with Wav2Vec speech features, MuQ music features, hard routing, and repeated audio injection blocks" loading="lazy" decoding="async">
+            <span class="figure-open">Open vector PDF ↗</span>
+          </a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section compact" id="diversity">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">07 · More Showcases</p>
+          <h2>More dancing showcases.</h2>
+        </div>
+
+        <div class="case-grid single wide">
+          <article class="media-card featured">
+            <div class="media-frame showcase-grid" data-media>
+              <video controls playsinline preload="metadata" poster="assets/showcases/more_showcases_poster.webp" aria-label="Ten dancing showcases arranged in a two-by-five grid and activated sequentially">
+                <source src="assets/showcases/more_showcases.mp4" type="video/mp4">
+              </video>
+              <div class="missing-state" aria-hidden="true">
+                <span class="missing-icon">5×2</span>
+                <strong>More dancing showcases</strong>
+                <code>assets/showcases/more_showcases.mp4</code>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span>Media notice: Some source media originate from publicly available online content and are used solely for non-commercial academic research. Rights remain with their respective owners. Rights holders may request removal.</span>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll("[data-media]").forEach((frame) => {
+      const video = frame.querySelector("video");
+      if (!video) return;
+
+      const markReady = () => frame.classList.add("is-ready");
+      const markMissing = () => frame.classList.remove("is-ready");
+
+      video.addEventListener("loadeddata", markReady, { once: true });
+      video.addEventListener("error", markMissing);
+      video.querySelectorAll("source").forEach((source) => {
+        source.addEventListener("error", markMissing);
+      });
+
+      if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        markReady();
+      }
+    });
+
+    document.querySelectorAll("[data-carousel]").forEach((carousel) => {
+      const shell = carousel.closest("[data-carousel-shell]");
+      const previousButton = shell.querySelector("[data-carousel-prev]");
+      const nextButton = shell.querySelector("[data-carousel-next]");
+      const status = shell.querySelector("[data-carousel-status]");
+      const cards = [...carousel.children].filter((child) => (
+        child.classList.contains("media-card") || child.classList.contains("music-case")
+      ));
+      let dragState = null;
+      let suppressNextClick = false;
+      let scrollTicking = false;
+
+      const cardStep = () => {
+        const card = cards[0];
+        if (!card) return carousel.clientWidth;
+        const styles = getComputedStyle(carousel);
+        const gap = parseFloat(styles.columnGap) || 0;
+        return card.getBoundingClientRect().width + gap;
+      };
+
+      const updateControls = () => {
+        const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+        const index = Math.min(
+          cards.length - 1,
+          Math.max(0, Math.round(carousel.scrollLeft / cardStep()))
+        );
+        if (carousel.dataset.carouselStatusMode === "dynamic") {
+          const label = cards[index]?.dataset.carouselLabel;
+          status.textContent = `${label ? `${label} · ` : ""}${index + 1} / ${cards.length}`;
+        }
+        previousButton.disabled = carousel.scrollLeft <= 2;
+        nextButton.disabled = carousel.scrollLeft >= maxScroll - 2;
+        scrollTicking = false;
+      };
+
+      const moveByCard = (direction) => {
+        carousel.scrollBy({ left: direction * cardStep(), behavior: "smooth" });
+      };
+
+      previousButton.addEventListener("click", () => moveByCard(-1));
+      nextButton.addEventListener("click", () => moveByCard(1));
+
+      carousel.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        moveByCard(event.key === "ArrowRight" ? 1 : -1);
+      });
+
+      carousel.addEventListener("scroll", () => {
+        if (scrollTicking) return;
+        scrollTicking = true;
+        requestAnimationFrame(updateControls);
+      }, { passive: true });
+
+      carousel.addEventListener("pointerdown", (event) => {
+        if (event.pointerType !== "mouse" || event.button !== 0) return;
+        if (event.target.closest("button, a")) return;
+
+        const video = event.target.closest("video");
+        if (video) {
+          const bounds = video.getBoundingClientRect();
+          if (event.clientY > bounds.bottom - 52) return;
+        }
+
+        dragState = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startScrollLeft: carousel.scrollLeft,
+          started: false
+        };
+      });
+
+      carousel.addEventListener("pointermove", (event) => {
+        if (!dragState || event.pointerId !== dragState.pointerId) return;
+        const distance = event.clientX - dragState.startX;
+        if (!dragState.started && Math.abs(distance) < 6) return;
+        if (!dragState.started) {
+          dragState.started = true;
+          carousel.classList.add("is-dragging");
+          carousel.setPointerCapture(event.pointerId);
+        }
+        carousel.scrollLeft = dragState.startScrollLeft - distance;
+        event.preventDefault();
+      });
+
+      const endDrag = (event) => {
+        if (!dragState || event.pointerId !== dragState.pointerId) return;
+        suppressNextClick = dragState.started;
+        carousel.classList.remove("is-dragging");
+        if (carousel.hasPointerCapture(event.pointerId)) {
+          carousel.releasePointerCapture(event.pointerId);
+        }
+        dragState = null;
+        setTimeout(() => { suppressNextClick = false; }, 0);
+      };
+
+      carousel.addEventListener("pointerup", endDrag);
+      carousel.addEventListener("pointercancel", endDrag);
+      carousel.addEventListener("click", (event) => {
+        if (!suppressNextClick) return;
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+      window.addEventListener("resize", updateControls);
+      updateControls();
+    });
+
+    document.querySelectorAll('a[href="#"]').forEach((link) => {
+      link.addEventListener("click", (event) => event.preventDefault());
+    });
+  </script>
+</body>
+</html>
