@@ -866,6 +866,22 @@
       transform: rotate(45deg);
     }
 
+    .citation-block {
+      margin: 0;
+      padding: clamp(20px, 3vw, 30px);
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      color: #ded5e8;
+      background: rgba(255, 255, 255, 0.035);
+      box-shadow: var(--shadow);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: clamp(12px, 1.25vw, 14px);
+      line-height: 1.7;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
     footer {
       padding: 28px 0;
       border-top: 1px solid var(--line);
@@ -1557,6 +1573,25 @@
             </div>
           </article>
         </div>
+      </div>
+    </section>
+
+    <section class="section compact" id="citation">
+      <div class="container">
+        <div class="section-head single-line">
+          <p class="eyebrow">08 · Citation</p>
+          <h2>Cite SingDance</h2>
+        </div>
+
+        <pre class="citation-block"><code>@misc{feng2026singdancecompositionalzeroshotsinginganddancing,
+  title         = {SingDance: Compositional Zero-Shot Singing-and-Dancing Video Generation with Role-Aware Audio Conditioning},
+  author        = {Tao Feng and Xu Li and Xiangyang Luo and Ming Wen and Huadai Liu and Chen Zhang and Wei Xue},
+  year          = {2026},
+  eprint        = {2608.16220},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.SD},
+  url           = {https://arxiv.org/abs/2608.16220}
+}</code></pre>
       </div>
     </section>
 
