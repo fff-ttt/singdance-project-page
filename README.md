@@ -1,41 +1,34 @@
-# SingDance Project Page
+# SingDance: Compositional Zero-Shot Singing-and-Dancing Video Generation with Role-Aware Audio Conditioning
 
-Static project page for **SingDance: Compositional Zero-Shot Singing-and-Dancing Video Generation with Role-Aware Audio Conditioning**.
+[Project Page](https://fff-ttt.github.io/singdance-project-page/) · [arXiv](https://arxiv.org/abs/2608.16220)
 
-## Repository layout
+SingDance is a unified video diffusion framework that models controllable vocal
+articulation as a semantic role and composes separately learned articulation and
+music-conditioned dance capabilities for zero-shot singing-and-dancing.
 
-- `site/` is the optimized public site deployed to GitHub Pages.
-- `scripts/validate_site.py` checks local references, anchors, duplicate IDs,
-  accidental source clips, absolute local paths, and GitHub's per-file limit.
-- The root-level `index.html` and `assets/` directory are local authoring masters
-  and are intentionally ignored by Git.
+## Authors
 
-## Local preview
+Tao Feng<sup>1,2,*</sup>, Xu Li<sup>1,†</sup>, Xiangyang Luo<sup>3</sup>,
+Ming Wen<sup>1</sup>, Huadai Liu<sup>1,2</sup>, Chen Zhang<sup>1</sup>,
+Wei Xue<sup>2,†</sup>
 
-```bash
-python -m http.server 8000 --directory site
+<sup>1</sup> Kling Team, Kuaishou Technology<br>
+<sup>2</sup> The Hong Kong University of Science and Technology<br>
+<sup>3</sup> Tsinghua University
+
+<sup>*</sup> Work done during an internship at Kling Team, Kuaishou Technology.<br>
+<sup>†</sup> Corresponding authors.
+
+## Citation
+
+```bibtex
+@misc{feng2026singdancecompositionalzeroshotsinginganddancing,
+  title        = {SingDance: Compositional Zero-Shot Singing-and-Dancing Video Generation with Role-Aware Audio Conditioning},
+  author       = {Tao Feng and Xu Li and Xiangyang Luo and Ming Wen and Huadai Liu and Chen Zhang and Wei Xue},
+  year         = {2026},
+  eprint       = {2608.16220},
+  archivePrefix = {arXiv},
+  primaryClass = {cs.SD},
+  url          = {https://arxiv.org/abs/2608.16220}
+}
 ```
-
-Open <http://localhost:8000> and run the release checks with:
-
-```bash
-python scripts/validate_site.py site
-```
-
-## GitHub Pages deployment
-
-The workflow in `.github/workflows/deploy-pages.yml` validates and deploys
-`site/` whenever `main` is updated. In the GitHub repository, open
-**Settings → Pages** and set **Source** to **GitHub Actions** once.
-
-The resulting project-site URL is normally:
-
-```text
-https://YOUR-GITHUB-USER.github.io/YOUR-REPOSITORY/
-```
-
-## Media notice
-
-Some source media originate from publicly available online content and are used
-solely for non-commercial academic research. Rights remain with their respective
-owners. No license is granted for third-party media assets.
